@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Scan</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static styles.css %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+    body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('file:///C:/Users/Ajaj/Pictures/Screenshots/403999-111122-ent-breakingbad-hmed.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            color: white; /* Adjust the text color for better readability */
+        }
+
+        h1, h2, h4 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        input[type="file"], button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>NutriScan</h1>
+    {% comment %} <h1>Upload an Image to Scan</h1> {% endcomment %}
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" required>
+        <button type="submit">Upload and Scan</button>
+    </form>
+    
+    <h2>Extracted Ingredients:</h2>
+    <h4>6-napthalate
+        dimethicone
+        phenoxyethanole
+        methylparaben
+        PEG-100
+        trideceth-6</h4>
+    <pre id="output"></pre>
+
+    <script>
+        $(document).ready(function(){
+            $('#upload-form').on('submit', function(e){
+                e.preventDefault();
+
+                const formData = new FormData(this);
+
+                // Adding the CSRF token
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                $.ajax({
+                    url: "{% url 'upload_and_scan_image' %}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data){
+                        $('#output').text(data.extracted_text);
+                    },
+                    error: function(xhr, status, error){
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
